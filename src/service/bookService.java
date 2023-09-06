@@ -43,4 +43,31 @@ public class bookService {
             System.out.println(String.format(output,  title, author, quantity, isbn));
         }
     }
+
+    public void update() throws SQLException {
+        String sql = "UPDATE books SET title=?, author=?, quantity=? WHERE bookId=?";
+
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, "editTest");
+        statement.setString(2, "William Henry Bill Gates");
+        statement.setString(3, "16");
+        statement.setString(4, "1");
+
+        int rowsUpdated = statement.executeUpdate();
+        if (rowsUpdated > 0) {
+    System.out.println("An existing user was updated successfully!");
+        }
+    }
+
+    public void delete() throws SQLException {
+        String sql = "DELETE FROM books WHERE bookId=?";
+
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, "2");
+
+        int rowsDeleted = statement.executeUpdate();
+        if (rowsDeleted > 0) {
+            System.out.println("A user was deleted successfully!");
+        }
+    }
 }

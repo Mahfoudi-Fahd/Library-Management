@@ -31,6 +31,8 @@ public class LibraryApp {
 
         bookService obj = new bookService();
         /*obj.insert();*/
-obj.getAll();
+/*obj.getAll();*/
+        /*obj.update();*/
+    obj.delete();
     }
 }
