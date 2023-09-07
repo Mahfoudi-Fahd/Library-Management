@@ -4,6 +4,7 @@ import entity.Reservation;
 import entity.User;
 import service.bookService;
 
+import java.io.IOException;
 import java.security.Provider;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,11 +13,11 @@ import java.util.Date;
 import java.util.List;
 
 public class LibraryApp {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, IOException {
 
 
 
-        Book book1 = new Book(1, "test entity.Book 1", "Author 1", 11, 12345);
+        Book book1 = new Book(1, "test entity.Book 1", "Author 1", 11, "12345");
         User user1 = new User(1, "Fahd");
 
 
@@ -30,9 +31,10 @@ public class LibraryApp {
 
 
         bookService obj = new bookService();
-        /*obj.insert();*/
-/*obj.getAll();*/
+//        obj.insert();
+//obj.getAll();
         /*obj.update();*/
-    obj.delete();
+//    obj.delete();
+        obj.search();
     }
 }

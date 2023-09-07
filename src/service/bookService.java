@@ -1,8 +1,11 @@
 package service;
 
 import config.DbConnection;
+import entity.Book;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.Scanner;
 
 
 public class bookService {
@@ -14,10 +17,10 @@ public class bookService {
         String sql = "INSERT INTO books (title,author,quantity,isbn ) VALUES (?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, "test");
-        statement.setString(2, "mee");
-        statement.setString(3, "12");
-        statement.setString(4, "tre57UUi");
+        statement.setString(1, "Book2");
+        statement.setString(2, "FAHD");
+        statement.setString(3, "10");
+        statement.setString(4, "FXRR4");
 
         int rowsInserted = statement.executeUpdate();
         if (rowsInserted > 0) {
@@ -31,7 +34,6 @@ public class bookService {
         Statement statement = connection.createStatement();
         ResultSet result = statement.executeQuery(sql);
 
-        int count = 0;
 
         while (result.next()){
             String title = result.getString(2);
@@ -68,6 +70,37 @@ public class bookService {
         int rowsDeleted = statement.executeUpdate();
         if (rowsDeleted > 0) {
             System.out.println("A user was deleted successfully!");
+        }
+    }
+
+    public void search() throws SQLException, IOException {
+        Scanner scan =new Scanner(System.in);
+
+        System.out.print("Enter Title: ");
+        String title = scan.nextLine();
+
+        System.out.print("Enter Author: ");
+        String author = scan.nextLine();
+
+        String sql= "SELECT * FROM `books` WHERE title=? OR author=?";
+
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1,title);
+        statement.setString(2,author);
+        System.out.println(title+author);
+        ResultSet result=statement.executeQuery();
+
+//        statement.setString(1, "editTest");
+
+        while (result.next()){
+            String resTitle = result.getString(2);
+            String resAuthor = result.getString(3);
+            int resQuantity = result.getInt("quantity");
+            String resIsbn = result.getString("isbn");
+
+            Book book = new Book(resTitle,resAuthor,resQuantity, resIsbn);
+//            String output = "Book :  %s ---- %s ---- %s ---- %s";
+            System.out.println(book);
         }
     }
 }
