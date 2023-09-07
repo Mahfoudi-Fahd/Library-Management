@@ -1,16 +1,12 @@
-import config.DbConnection;
+import repository.BookRepository;
 import entity.Book;
 import entity.Reservation;
 import entity.User;
-import service.bookService;
+import service.BookService;
 
 import java.io.IOException;
-import java.security.Provider;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 
 public class LibraryApp {
     public static void main(String[] args) throws SQLException, IOException {
@@ -30,11 +26,14 @@ public class LibraryApp {
         System.out.println("Return Date: " + reservation1.getReturnDate());*/
 
 
-        bookService obj = new bookService();
-//        obj.insert();
-//obj.getAll();
-        /*obj.update();*/
-//    obj.delete();
-        obj.search();
+//        BookRepository obj = new BookRepository();
+        BookService obj = new BookService();
+
+        obj.searchByTitle();
+//        obj.searchByAuthor();
+//        obj.saveBook();
+//        obj.editBook();
+//        obj.deleteBook();
+//        obj.getAllBooks();
     }
 }
