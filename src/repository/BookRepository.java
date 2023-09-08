@@ -13,20 +13,69 @@ import java.util.Scanner;
 public class BookRepository {
     static Connection connection = DbConnection.dbConnection();
 
-    public static void insert() throws SQLException {
+    private static boolean isValidBook(String title, String author, String ISBN, int quantity) {
+
+        if (title.isEmpty() || author.isEmpty() || ISBN.isEmpty()) {
+            return false;
+        }
+
+        if (quantity <= 0) {
+            return false;
+        }
 
 
-        String sql = "INSERT INTO books (title,author,quantity,isbn ) VALUES (?, ?, ?, ?)";
+        return true;
+    }
 
+
+    private static boolean isBookAlreadyExists(String title, String ISBN) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM books WHERE title = ? OR isbn = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, "Book3");
-        statement.setString(2, "FAHD");
-        statement.setString(3, "10");
-        statement.setString(4, "FG2XRR4");
+        statement.setString(1, title);
+        statement.setString(2, ISBN);
+        ResultSet result = statement.executeQuery();
 
-        int rowsInserted = statement.executeUpdate();
-        if (rowsInserted > 0) {
-            System.out.println("A new Book was inserted successfully!");
+        if (result.next()) {
+            int count = result.getInt(1);
+            return count > 0;
+        }
+
+        return false;
+    }
+
+
+    public static void insert() throws SQLException {
+        Scanner scanner =new Scanner(System.in);
+
+        System.out.println("**************** Add a New Book *****************");
+        System.out.println("Enter Title : ");
+        String title = scanner.nextLine();
+        System.out.println("Enter Author : ");
+        String author = scanner.nextLine();
+        System.out.println("Enter ISBN : ");
+        String ISBN =  scanner.nextLine();
+        System.out.println("Enter quantity : ");
+        int quantity =  scanner.nextInt();
+
+        if (isValidBook(title, author, ISBN, quantity )) {
+            if (isBookAlreadyExists(title,ISBN)) {
+                System.out.println("___________________________________________________________\n   A book with the same title Or ISBN already exists. \n ________________________________________________________");
+            } else {
+                String sql = "INSERT INTO books (title, author, quantity, isbn) VALUES (?, ?, ?, ?)";
+
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setString(1, title);
+                statement.setString(2, author);
+                statement.setInt(3, quantity);
+                statement.setString(4, ISBN);
+
+                int rowsInserted = statement.executeUpdate();
+                if (rowsInserted > 0) {
+                    System.out.println("A new Book was inserted successfully!");
+                }
+            }
+        } else {
+            System.out.println("Invalid book data. Please check your input.");
         }
     }
 
@@ -50,17 +99,31 @@ public class BookRepository {
     }
 
     public static void update() throws SQLException {
-        String sql = "UPDATE books SET title=?, author=?, quantity=? WHERE bookId=?";
+        Scanner scanner= new Scanner(System.in);
+
+        System.out.println("Enter ISBN : ");
+        String ISBN =  scanner.nextLine();
+        System.out.println("**************** Edit Book *****************");
+        System.out.println("Enter New Title : ");
+        String title = scanner.nextLine();
+        System.out.println("Enter New Author : ");
+        String author = scanner.nextLine();
+
+        System.out.println("Enter New quantity : ");
+        int quantity =  scanner.nextInt();
+
+
+        String sql = "UPDATE books SET title=?, author=?, quantity=? WHERE isbn=?";
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, "editTest");
-        statement.setString(2, "William Henry Bill Gates");
-        statement.setString(3, "16");
-        statement.setString(4, "1");
+        statement.setString(1, title);
+        statement.setString(2, author);
+        statement.setInt(3, quantity);
+        statement.setString(4, ISBN);
 
         int rowsUpdated = statement.executeUpdate();
         if (rowsUpdated > 0) {
-    System.out.println("An existing user was updated successfully!");
+    System.out.println("An existing Book was updated successfully!");
         }
     }
 
@@ -133,7 +196,7 @@ public class BookRepository {
             String resIsbn = result.getString("isbn");
 
             Book book = new Book(resTitle,resAuthor,resQuantity, resIsbn);
-//            String output = "Book :  %s ---- %s ---- %s ---- %s";
+
             System.out.println(book);
             found = true;
         }

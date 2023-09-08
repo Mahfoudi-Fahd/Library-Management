@@ -2,7 +2,9 @@ import repository.BookRepository;
 import entity.Book;
 import entity.Reservation;
 import entity.User;
+import repository.ReservationRepository;
 import service.BookService;
+import service.ReservationService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -13,11 +15,11 @@ public class LibraryApp {
 
 
 
-        Book book1 = new Book(1, "test entity.Book 1", "Author 1", 11, "12345");
-        User user1 = new User(1, "Fahd");
+//        Book book1 = new Book(1, "test entity.Book 1", "Author 1", 11, "12345");
+//        User user1 = new User(1, "Fahd");
 
 
-        Reservation reservation1 = new Reservation(1001, user1, book1,new Date(),"23-04-2024");
+//        Reservation reservation1 = new Reservation(1001, user1, book1,new Date(),"23-04-2024");
 
 
         /*System.out.println("Book Title: " + book1.getTitle());
@@ -26,14 +28,16 @@ public class LibraryApp {
         System.out.println("Return Date: " + reservation1.getReturnDate());*/
 
 
-//        BookRepository obj = new BookRepository();
-        BookService obj = new BookService();
+//        BookService obj = new BookService();
 
-        obj.searchByTitle();
+//        obj.searchByTitle();
 //        obj.searchByAuthor();
 //        obj.saveBook();
 //        obj.editBook();
 //        obj.deleteBook();
 //        obj.getAllBooks();
+
+        ReservationService obj = new ReservationService();
+        obj.reserveBook();
     }
 }
