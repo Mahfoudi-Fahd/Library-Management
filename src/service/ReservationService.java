@@ -11,5 +11,9 @@ public class ReservationService {
 
             ReservationRepository.reserve();
         }
+
+        public void returnBorrowedBook() throws SQLException {
+            ReservationRepository.returnBook();
+        }
     }
 

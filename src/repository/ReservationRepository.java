@@ -1,7 +1,6 @@
 package repository;
 
 import config.DbConnection;
-import entity.Reservation;
 import entity.ReservationStatus;
 
 import java.sql.*;
@@ -26,7 +25,7 @@ public class ReservationRepository {
         String returnDate = scanner.nextLine();
 
         // Retrieve User ID from the database based on the user's name
-        int userId = getUserIdFromDatabase(userName);
+        int userId = getUserIdFromDatabase(connection, userName);
 
         // Retrieve Book ID from the database based on the book's title
         int bookId = getBookIdFromDatabase(bookTitle);
@@ -57,9 +56,9 @@ public class ReservationRepository {
         }
     }
 
-    private static int getUserIdFromDatabase(String userName) throws SQLException {
+    private static int getUserIdFromDatabase(Connection connection, String userName) throws SQLException {
         String sql = "SELECT id FROM users WHERE name = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = ReservationRepository.connection.prepareStatement(sql)) {
             statement.setString(1, userName);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -80,6 +79,7 @@ public class ReservationRepository {
         }
         return -1; // Return -1 if the book is not found in the database
     }
+
     private static void decrementBookQuantity(Connection connection, int bookId) throws SQLException {
         String updateSql = "UPDATE books SET quantity = quantity - 1 WHERE id = ?";
         try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
@@ -92,4 +92,53 @@ public class ReservationRepository {
             }
         }
     }
+
+
+    public static void returnBook() throws SQLException {
+
+        Scanner scanner = new Scanner(System.in);
+        // ...
+
+        // Prompt the user to enter their username
+        System.out.println("Enter your username: ");
+        String username = scanner.nextLine();
+
+        // Return the book associated with the user's username
+        boolean bookReturned = returnBookByUsername(username);
+
+        if (bookReturned) {
+            System.out.println("Book has been returned.");
+        } else {
+            System.out.println("No reservations found for the user or book has already been returned.");
+        }
+
+        // Close the scanner and perform any necessary cleanup
+        scanner.close();
+    }
+
+    public static boolean returnBookByUsername(String username) throws SQLException {
+            int userId = getUserIdFromDatabase(connection, username);
+
+            if (userId != -1) {
+                String sql = "UPDATE reservations SET reservationStatus = ? " +
+                        "WHERE user_id = ? AND reservationStatus = ?";
+
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setString(1, ReservationStatus.RETURNED.toString());
+                    statement.setInt(2, userId);
+                    statement.setString(3, ReservationStatus.RESERVED.toString());
+
+                    int rowsUpdated = statement.executeUpdate();
+
+                    return rowsUpdated > 0;
+                }
+            }
+
+
+        return false;
+    }
+
+
+
+
 }
