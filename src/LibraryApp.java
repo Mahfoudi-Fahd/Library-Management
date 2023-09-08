@@ -38,7 +38,7 @@ public class LibraryApp {
 //        obj.getAllBooks();
 
         ReservationService obj = new ReservationService();
-//        obj.reserveBook();
-    obj.returnBorrowedBook();
+        obj.reserveBook();
+//    obj.returnBorrowedBook();
     }
 }

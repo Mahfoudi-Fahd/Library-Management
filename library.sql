@@ -1,6 +1,8 @@
 DROP DATABASE IF EXISTS library;
 CREATE DATABASE library;
+SET GLOBAL event_scheduler = ON;
 USE library;
+
 
 CREATE TABLE books(
                       id    INT PRIMARY KEY AUTO_INCREMENT ,
@@ -24,3 +26,15 @@ CREATE TABLE reservations(
                     FOREIGN KEY (book_id) REFERENCES books (id)
 );
 
+DELIMITER //
+CREATE EVENT MarkBooksAsLost
+ON SCHEDULE EVERY 1 DAY
+STARTS TIMESTAMP(CURRENT_DATE, '00:00:00')
+DO
+BEGIN
+UPDATE book_reservations
+SET reservation_status = 'LOST'
+WHERE reservationStatus = 'RESERVED' AND returnDate < CURDATE();
+END;
+//
+DELIMITER ;
