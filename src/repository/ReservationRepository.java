@@ -46,6 +46,9 @@ public class ReservationRepository {
 
                 int rowsInserted = statement.executeUpdate();
                 if (rowsInserted > 0) {
+
+                    decrementBookQuantity(connection, bookId);
+
                     System.out.println("A new reservation was created successfully!");
                 }
             }
@@ -77,5 +80,16 @@ public class ReservationRepository {
         }
         return -1; // Return -1 if the book is not found in the database
     }
-
+    private static void decrementBookQuantity(Connection connection, int bookId) throws SQLException {
+        String updateSql = "UPDATE books SET quantity = quantity - 1 WHERE id = ?";
+        try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+            updateStatement.setInt(1, bookId);
+            int rowsUpdated = updateStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Book quantity decremented successfully.");
+            } else {
+                System.out.println("Failed to update book quantity.");
+            }
+        }
+    }
 }
