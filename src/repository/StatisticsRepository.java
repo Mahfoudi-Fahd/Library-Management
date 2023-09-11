@@ -28,7 +28,7 @@ public class StatisticsRepository {
                 int lostBooksCount = executeCountQuery(connection, lostBooksQuery);
 
                 // Print the statistics
-                System.out.println("********** Library Statistics **********");
+                System.out.println("\n\n\n********** Library Statistics **********");
                 System.out.println("Available Books: " + availableBooksCount);
                 System.out.println("Borrowed Books: " + borrowedBooksCount);
                 System.out.println("Lost Books: " + lostBooksCount);

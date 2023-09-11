@@ -23,7 +23,8 @@ CREATE TABLE reservations(
                     returnDate        VARCHAR(255),
                     reservationStatus ENUM('RESERVED','RETURNED','LOST'),
                     FOREIGN KEY (user_id) REFERENCES users (id),
-                    FOREIGN KEY (book_id) REFERENCES books (id)
+                    FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE
+
 );
 
 DELIMITER //

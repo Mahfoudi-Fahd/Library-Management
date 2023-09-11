@@ -30,7 +30,8 @@ public class ReservationRepository {
         // Retrieve Book ID from the database based on the book's title
         int bookId = getBookIdFromDatabase(bookTitle);
 
-        if (userId != -1 && bookId != -1) {
+
+        if (userId != -1 && bookId != -1 ) {
             // Both User ID and Book ID were successfully retrieved from the database
             ReservationStatus reservationStatus = ReservationStatus.RESERVED; // Set the status to RESERVED
 
@@ -81,17 +82,35 @@ public class ReservationRepository {
     }
 
     private static void decrementBookQuantity(Connection connection, int bookId) throws SQLException {
-        String updateSql = "UPDATE books SET quantity = quantity - 1 WHERE id = ?";
-        try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
-            updateStatement.setInt(1, bookId);
-            int rowsUpdated = updateStatement.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("Book quantity decremented successfully.");
-            } else {
-                System.out.println("Failed to update book quantity.");
+        // Check if the current quantity is greater than 0
+        if (getBookQuantity(connection, bookId) > 0) {
+            String updateSql = "UPDATE books SET quantity = quantity - 1 WHERE id = ?";
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                updateStatement.setInt(1, bookId);
+                int rowsUpdated = updateStatement.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Book quantity decremented successfully.");
+                } else {
+                    System.out.println("Failed to update book quantity.");
+                }
             }
+        } else {
+            System.out.println("Book quantity is already at 0. Cannot decrement further.");
         }
     }
+
+    private static int getBookQuantity(Connection connection, int bookId) throws SQLException {
+        String query = "SELECT quantity FROM books WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, bookId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("quantity");
+            }
+        }
+        return 0; // Return 0 if the book is not found
+    }
+
 
 
     public static void returnBook() throws SQLException {

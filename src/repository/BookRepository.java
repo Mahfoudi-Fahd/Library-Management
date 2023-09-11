@@ -80,7 +80,7 @@ public class BookRepository {
     }
 
     public static List<Book> getAll() throws SQLException {
-        String sql = "SELECT * FROM books";
+        String sql = "SELECT * FROM books WHERE quantity>0";
 
         Statement statement = connection.createStatement();
         ResultSet result = statement.executeQuery(sql);
@@ -91,8 +91,7 @@ public class BookRepository {
             String author = result.getString(3);
             String quantity = result.getString("quantity");
             String isbn = result.getString("isbn");
-
-            String output = "Book : %s - %s - %s - %s";
+            String output = "\nBook :| %s | %s   |   %s    | %s |";
             System.out.println(String.format(output,  title, author, quantity, isbn));
         }
         return null;
@@ -128,17 +127,43 @@ public class BookRepository {
     }
 
     public static void delete() throws SQLException {
+        Scanner scanner = new Scanner(System.in);
 
-        String sql = "DELETE FROM books WHERE bookId=?";
+        System.out.println("Enter ISBN : ");
+        String ISBN = scanner.nextLine();
 
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, "2");
+        // Check if the book with the given ISBN exists
+        if (bookExistsByISBN(ISBN)) {
+            String sql = "DELETE FROM books WHERE isbn=?";
 
-        int rowsDeleted = statement.executeUpdate();
-        if (rowsDeleted > 0) {
-            System.out.println("A user was deleted successfully!");
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, ISBN);
+
+                int rowsDeleted = statement.executeUpdate();
+                if (rowsDeleted > 0) {
+                    System.out.println("Book with ISBN " + ISBN + " was deleted successfully!");
+                } else {
+                    System.out.println("Failed to delete the book.");
+                }
+            }
+        } else {
+            System.out.println("Book with ISBN " + ISBN + " does not exist in the database.");
         }
     }
+
+    private static boolean bookExistsByISBN(String ISBN) throws SQLException {
+        String query = "SELECT COUNT(*) FROM books WHERE isbn=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, ISBN);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt(1);
+                return count > 0;
+            }
+        }
+        return false;
+    }
+
 
     public static void searchByTitle() throws SQLException, IOException {
         Scanner scan =new Scanner(System.in);

@@ -54,6 +54,8 @@ public class LibraryApp {
                 boolean isRunning = true;
 
                 while (isRunning) {
+                    System.out.println("\n\n\n------------------------------------------");
+
                     System.out.println("Choose an action:");
                     System.out.println("1. Create New Book");
                     System.out.println("2. Edit a Book");
