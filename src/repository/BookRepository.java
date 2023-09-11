@@ -128,6 +128,7 @@ public class BookRepository {
     }
 
     public static void delete() throws SQLException {
+
         String sql = "DELETE FROM books WHERE bookId=?";
 
         PreparedStatement statement = connection.prepareStatement(sql);

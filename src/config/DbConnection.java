@@ -17,7 +17,6 @@ public class DbConnection {
         //jdbc:mysql://localhost:3306/library
         try {
             connection = DriverManager.getConnection(String.format("jdbc:mysql://%s:%d/%s", HOST, PORT, DB_NAME), USERNAME, PASSWORD);
-            System.out.println("done");
         }catch (SQLException e){
             e.printStackTrace();
         }
