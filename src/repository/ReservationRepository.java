@@ -2,6 +2,7 @@ package repository;
 
 import config.DbConnection;
 import entity.ReservationStatus;
+import entity.User;
 
 import java.sql.*;
 import java.util.Scanner;
@@ -31,35 +32,41 @@ public class ReservationRepository {
         int bookId = getBookIdFromDatabase(bookTitle);
         int bookQuantity = getBookQuantity(connection,bookId);
 
-
-        if (userId != -1 && bookId != -1  ) {
+        if (userId != -1 && bookId != -1 ) {
             // Both User ID and Book ID were successfully retrieved from the database
-            ReservationStatus reservationStatus = ReservationStatus.RESERVED; // Set the status to RESERVED
-            if (bookQuantity>0) {
-                String sql = "INSERT INTO reservations (user_id, book_id, borrowDate, returnDate,reservationStatus) VALUES (?, ?, ?,?, ?)";
 
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    statement.setInt(1, userId);
-                    statement.setInt(2, bookId);
-                    statement.setString(3, borrowDate);
-                    statement.setString(4, returnDate);
-                    statement.setString(5, reservationStatus.toString());
+            // Check if the user has any existing reservations with status "RESERVED" or "LOST"
+            if (!hasActiveReservations(connection, userId)) {
+                // Check if the book's quantity is greater than 0
 
-                    int rowsInserted = statement.executeUpdate();
-                    if (rowsInserted > 0) {
+                if (bookQuantity > 0) {
+                    ReservationStatus reservationStatus = ReservationStatus.RESERVED; // Set the status to RESERVED
 
-                        decrementBookQuantity(connection, bookId);
+                    String sql = "INSERT INTO reservations (user_id, book_id, borrowDate, returnDate, reservationStatus) VALUES (?, ?, ?, ?, ?)";
 
-                        System.out.println("A new reservation was created successfully!");
+                    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                        statement.setInt(1, userId);
+                        statement.setInt(2, bookId);
+                        statement.setString(3, borrowDate);
+                        statement.setString(4, returnDate);
+                        statement.setString(5, reservationStatus.toString());
+
+                        int rowsInserted = statement.executeUpdate();
+                        if (rowsInserted > 0) {
+                            decrementBookQuantity(connection, bookId);
+                            System.out.println("A new reservation was created successfully!");
+                        }
                     }
+                } else {
+                    System.out.println("Failed to create a reservation. Book quantity is already at 0.");
                 }
-            }else
-            {
-                System.out.println("All units From this Book Are reserved");
+            } else {
+                System.out.println("Failed to create a reservation. User already has an active reservation.");
             }
         } else {
             System.out.println("Failed to retrieve User ID or Book ID from the database.");
         }
+
     }
 
     private static int getUserIdFromDatabase(Connection connection, String userName) throws SQLException {
@@ -157,6 +164,19 @@ public class ReservationRepository {
             }
 
 
+        return false;
+    }
+
+    private static boolean hasActiveReservations(Connection connection, int userId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reservations WHERE user_id = ? AND reservationStatus IN ('RESERVED', 'LOST')";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                int activeReservationsCount = resultSet.getInt(1);
+                return activeReservationsCount > 0;
+            }
+        }
         return false;
     }
 
