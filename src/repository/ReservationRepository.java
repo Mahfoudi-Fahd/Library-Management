@@ -29,28 +29,33 @@ public class ReservationRepository {
 
         // Retrieve Book ID from the database based on the book's title
         int bookId = getBookIdFromDatabase(bookTitle);
+        int bookQuantity = getBookQuantity(connection,bookId);
 
 
-        if (userId != -1 && bookId != -1 ) {
+        if (userId != -1 && bookId != -1  ) {
             // Both User ID and Book ID were successfully retrieved from the database
             ReservationStatus reservationStatus = ReservationStatus.RESERVED; // Set the status to RESERVED
+            if (bookQuantity>0) {
+                String sql = "INSERT INTO reservations (user_id, book_id, borrowDate, returnDate,reservationStatus) VALUES (?, ?, ?,?, ?)";
 
-            String sql = "INSERT INTO reservations (user_id, book_id, borrowDate, returnDate,reservationStatus) VALUES (?, ?, ?,?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setInt(1, userId);
+                    statement.setInt(2, bookId);
+                    statement.setString(3, borrowDate);
+                    statement.setString(4, returnDate);
+                    statement.setString(5, reservationStatus.toString());
 
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setInt(1, userId);
-                statement.setInt(2, bookId);
-                statement.setString(3, borrowDate);
-                statement.setString(4, returnDate);
-                statement.setString(5, reservationStatus.toString());
+                    int rowsInserted = statement.executeUpdate();
+                    if (rowsInserted > 0) {
 
-                int rowsInserted = statement.executeUpdate();
-                if (rowsInserted > 0) {
+                        decrementBookQuantity(connection, bookId);
 
-                    decrementBookQuantity(connection, bookId);
-
-                    System.out.println("A new reservation was created successfully!");
+                        System.out.println("A new reservation was created successfully!");
+                    }
                 }
+            }else
+            {
+                System.out.println("All units From this Book Are reserved");
             }
         } else {
             System.out.println("Failed to retrieve User ID or Book ID from the database.");
@@ -131,8 +136,6 @@ public class ReservationRepository {
             System.out.println("No reservations found for the user or book has already been returned.");
         }
 
-        // Close the scanner and perform any necessary cleanup
-        scanner.close();
     }
 
     public static boolean returnBookByUsername(String username) throws SQLException {
