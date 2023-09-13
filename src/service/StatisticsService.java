@@ -10,4 +10,5 @@ public class StatisticsService {
         StatisticsRepository.generateLibraryStatistics();
     }
 
+
 }

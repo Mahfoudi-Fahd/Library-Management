@@ -1,3 +1,5 @@
+import repository.ReservationRepository;
+import repository.StatisticsRepository;
 import service.BookService;
 import service.ReservationService;
 import service.StatisticsService;

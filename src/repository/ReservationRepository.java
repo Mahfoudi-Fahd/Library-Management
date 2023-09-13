@@ -2,15 +2,21 @@ package repository;
 
 import config.DbConnection;
 import entity.ReservationStatus;
-import entity.User;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.sql.*;
 import java.util.Scanner;
-//import java.sql.Date;
+
 
 
 public class ReservationRepository {
     static Connection connection = DbConnection.dbConnection();
+
+
+
+// ...
 
     public static void reserve() throws SQLException {
         Scanner scanner = new Scanner(System.in);
@@ -20,26 +26,53 @@ public class ReservationRepository {
         String userName = scanner.nextLine(); // Input the user's name
         System.out.println("Enter Book Title : ");
         String bookTitle = scanner.nextLine(); // Input the book's title
-        System.out.println("Enter Borrow Date : ");
-        String borrowDate = scanner.nextLine();
-        System.out.println("Enter Return Date : ");
-        String returnDate = scanner.nextLine();
+        System.out.println("Enter Borrow Date (yyyy-MM-dd): ");
+        String borrowDateStr = scanner.nextLine();
+        System.out.println("Enter Return Date (yyyy-MM-dd): ");
+        String returnDateStr = scanner.nextLine();
 
         // Retrieve User ID from the database based on the user's name
         int userId = getUserIdFromDatabase(connection, userName);
 
         // Retrieve Book ID from the database based on the book's title
         int bookId = getBookIdFromDatabase(bookTitle);
-        int bookQuantity = getBookQuantity(connection,bookId);
+        int bookQuantity = getBookQuantity(connection, bookId);
 
-        if (userId != -1 && bookId != -1 ) {
+        if (userId != -1 && bookId != -1) {
             // Both User ID and Book ID were successfully retrieved from the database
 
             // Check if the user has any existing reservations with status "RESERVED" or "LOST"
             if (!hasActiveReservations(connection, userId)) {
                 // Check if the book's quantity is greater than 0
-
                 if (bookQuantity > 0) {
+                    // Parse the borrowDate and returnDate as Date objects
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date borrowDate;
+                    Date returnDate;
+                    try {
+                        borrowDate = dateFormat.parse(borrowDateStr);
+                        returnDate = dateFormat.parse(returnDateStr);
+                    } catch (ParseException e) {
+                        System.out.println("\n\n____________________________________________\nInvalid date format. Please use yyyy-MM-dd.\n____________________________________________");
+                        return;
+                    }
+
+                    // Get the current date
+                    Date currentDate = new Date();
+
+                    // Check if borrowDate is in the past
+                    if (borrowDate.before(currentDate)) {
+                        System.out.println("\n\n____________________________________________\nBorrow date cannot be in the past.\n____________________________________________");
+
+                        return;
+                    }
+
+                    // Check if returnDate is in the past
+                    if (returnDate.before(currentDate)) {
+                        System.out.println("\n\n____________________________________________\nReturn date cannot be in the past.\n____________________________________________");
+                        return;
+                    }
+
                     ReservationStatus reservationStatus = ReservationStatus.RESERVED; // Set the status to RESERVED
 
                     String sql = "INSERT INTO reservations (user_id, book_id, borrowDate, returnDate, reservationStatus) VALUES (?, ?, ?, ?, ?)";
@@ -47,8 +80,8 @@ public class ReservationRepository {
                     try (PreparedStatement statement = connection.prepareStatement(sql)) {
                         statement.setInt(1, userId);
                         statement.setInt(2, bookId);
-                        statement.setString(3, borrowDate);
-                        statement.setString(4, returnDate);
+                        statement.setString(3, borrowDateStr);
+                        statement.setString(4, returnDateStr);
                         statement.setString(5, reservationStatus.toString());
 
                         int rowsInserted = statement.executeUpdate();
@@ -66,8 +99,8 @@ public class ReservationRepository {
         } else {
             System.out.println("Failed to retrieve User ID or Book ID from the database.");
         }
-
     }
+
 
     private static int getUserIdFromDatabase(Connection connection, String userName) throws SQLException {
         String sql = "SELECT id FROM users WHERE name = ?";
